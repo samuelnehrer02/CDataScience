@@ -1,0 +1,76 @@
+---
+title: "CuDa Project"
+author: "Jonathan"
+date: "2024-12-01"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(brms)
+library(rethinking)
+
+```
+
+
+```{r}
+
+d <- read.csv("data/lejemaal.csv")
+
+```
+
+```{r}
+
+d <- d[is.finite(d$net_price_per_sqm), ]
+d <- d[is.finite(d$area), ]
+d$postal_code <- as.factor(d$postal_code)
+d$city <- as.factor(d$city)
+
+```
+
+
+```{r}
+
+
+model <- lm(net_price_per_sqm ~ rooms + area + deposit + city, d)
+
+summary(model)
+
+
+```
+
+
+```{r}
+model1 <- brm(
+  formula = net_price_per_sqm ~ area + deposit,
+  data = d,
+  family = gaussian(),
+    prior = c(
+    set_prior("normal(100, 30)", class = "Intercept"),
+    set_prior("normal(0, 4)", class = "b", coef = "area"),
+    set_prior("normal(0, 4)", class = "b", coef = "deposit")
+  ),
+  chains = 4,
+  cores = 4
+)
+```
+
+```{r}
+summary(model1)
+
+```
+
+```{r}
+plot(model1)
+```
+
+
+
+
+
+
+
+
+
